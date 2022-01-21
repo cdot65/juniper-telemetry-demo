@@ -440,33 +440,33 @@
 <h2 id="assumptions-made-on-my-part">Assumptions made on my part<a class="headerlink" href="#assumptions-made-on-my-part" title="Permanent link">#</a></h2>
 <p>I make a lot of assumptions in this documentation, here&rsquo;s a short list:</p>
 <ul>
-<li>you have <a href="">Docker installed</a> somewhere that can reach the internet</li>
+<li>you have <a href="https://docs.docker.com/get-docker/">Docker installed</a> somewhere that can reach the internet</li>
 <li>you understand the <a href="https://www.juniper.net/documentation/us/en/software/junos/interfaces-telemetry/topics/concept/junos-telemetry-interface-oveview.html">value proposition and technology that powers</a> streaming telemetry</li>
-<li>you have access to a Juniper device with JTI installed</li>
+<li>you have access to a <a href="https://www.juniper.net/us/en/dm/vmx-trial-download.html">Juniper device with JTI installed</a></li>
 </ul>
 <h2 id="creating-our-certs">Creating our certs<a class="headerlink" href="#creating-our-certs" title="Permanent link">#</a></h2>
 <p>We will be using SSL certificates for this demo, and if you&rsquo;ve ever played with SSL you know that it can be a pain. Here are the steps I followed, as given to the readers of <a href="https://iosonounrouter.wordpress.com/2021/12/20/test-juniper-telemetry-in-two-seconds/">this great blog</a>.</p>
 <p>Let&rsquo;s start off by generating a self-signed root CA:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$ openssl genrsa -out rootCA.key <span class="m">2048</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>$ openssl req -x509 -new -key ./rootCA.key -days <span class="m">365</span> -out ./rootCA.crt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>openssl genrsa -out rootCA.key <span class="m">2048</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>openssl req -x509 -new -key ./rootCA.key -days <span class="m">365</span> -out ./rootCA.crt
 </code></pre></div>
 <p>Our next step is to use the rootCA to create a certificate for the jtimon container client</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ openssl genrsa -out ./client.key <span class="m">2048</span> 
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>$ openssl req -new -key ./client.key -out ./client.csr
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>$ openssl x509 -req -in ./client.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./client.crt -days <span class="m">365</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>openssl genrsa -out ./client.key <span class="m">2048</span> 
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>openssl req -new -key ./client.key -out ./client.csr
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>openssl x509 -req -in ./client.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./client.crt -days <span class="m">365</span>
 </code></pre></div>
 <p>Finally, we will use the rootCA to create a certificate for the jtimon container client</p>
 <blockquote>
 <p>pay close attention to the fqdn for this section, it needs to match your router&rsquo;s hostname</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$ openssl genrsa -out ./router.key <span class="m">2048</span> 
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>$ openssl req -new -key ./router.key -out ./router.csr
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>$ openssl x509 -req -in ./router.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./router.crt -days <span class="m">365</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>$ cat ./router.crt ./router.key &gt; ./router.pem
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>openssl genrsa -out ./router.key <span class="m">2048</span> 
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>openssl req -new -key ./router.key -out ./router.csr
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>openssl x509 -req -in ./router.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./router.crt -days <span class="m">365</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>cat ./router.crt ./router.key &gt; ./router.pem
 </code></pre></div>
 <h2 id="copy-relevant-certs-to-router">Copy relevant certs to router<a class="headerlink" href="#copy-relevant-certs-to-router" title="Permanent link">#</a></h2>
 <p>Let&rsquo;s use SCP to copy the certs to our router; only relevant files are transferred and stored in the router&rsquo;s <code>/var/tmp/</code> directory.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ scp rootCA.crt client.crt router.pem root@192.168.110.11:/var/tmp/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>scp rootCA.crt client.crt router.pem root@192.168.110.11:/var/tmp/
 </code></pre></div>
 <h2 id="configure-junos">Configure JunOS<a class="headerlink" href="#configure-junos" title="Permanent link">#</a></h2>
 <p>Three steps here, each with their own commit operation.</p>
