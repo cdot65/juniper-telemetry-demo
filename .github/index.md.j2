@@ -2,88 +2,76 @@
 
 ## Welcome
 
-First off, hello and welcome to the landing page of my app's documentation. My name is Calvin and I work in the sales organization at Juniper Networks; I hope that you will find this project helpful.
+First off, hello and welcome to the landing page of my demo's documentation. My name is Calvin and I work in the sales organization at Juniper Networks; I hope that you will find this project helpful.
 
-This project will stand up an example Express application with a working REST API with a handful of functions. A mongodb database will provide the necessary feature of storing and retrieving data for our little app.
+In this demonstration, we will deploy jtimon as a container to ingest JTI telemetry from Juniper vMX routers.
 
-## Containers
+![topology](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/images/topology.png?raw=true)
 
-### nodejs
+## Overview
 
-A Dockerfile has been provided at [files/nodejs](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/nodejs/Dockerfile); it is based on `node:alpine` and simply executes our code after copying it into the `/usr/src/app` directory.
+Let's talk about the workflow before we get into the requirements. 
 
-### mongodb
+At the end of this page we will have deployed a Docker container running [jtimon](https://github.com/nileshsimaria/jtimon) to collect the streaming telemetry sent by our routers. We will have subscribed to the telemetry path that will send our container information regarding to BGP over gRPC with SSL encryption.
 
-Our database platform will be based upon the official `mongo:latest` image and requires no modification, so the only trace of it will be found in the [files/docker-compose.yaml](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/docker-compose.yaml) file.
+## Assumptions made on my part
 
-### Docker Compose
+I make a lot of assumptions in this documentation, here's a short list:
 
-A [docker-compose.yaml](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/docker-compose.yaml) file has been provided for local testing only.
+  - you have [Docker installed]() somewhere that can reach the internet
+  - you understand the [value proposition and technology that powers](https://www.juniper.net/documentation/us/en/software/junos/interfaces-telemetry/topics/concept/junos-telemetry-interface-oveview.html) streaming telemetry
+  - you have access to a Juniper device with JTI installed
 
-Remember our goal is to deploy this to a k8s cluster.
+## Creating our certs
 
-## Data Model
+We will be using SSL certificates for this demo, and if you've ever played with SSL you know that it can be a pain. Here are the steps I followed, as given to the readers of [this great blog](https://iosonounrouter.wordpress.com/2021/12/20/test-juniper-telemetry-in-two-seconds/).
 
-For our requests, we'll need to align ourselves with the data model defined in [files/nodejs/models/model.js](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/nodejs/models/model.js)
+Let's start off by generating a self-signed root CA:
 
-```javascript
-// files/nodejs/models/model.js
-const taskSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: 'Enter the name of the task'
-    },
-    date_created: {
-        type: Date,
-        default: Date.now
-    },
-    status: {
-        type: [{
-            type: String,
-            enum: ['pending', 'ongoing', 'completed']
-        }],
-        default: ['pending']
-    }
-});
+```bash
+$ openssl genrsa -out rootCA.key 2048
+$ openssl req -x509 -new -key ./rootCA.key -days 365 -out ./rootCA.crt
 ```
 
-## API methods
+Our next step is to use the rootCA to create a certificate for the jtimon container client
 
-The URI for our API methods will end with `/tasks` or `/tasks/:taskId`
-
-### Create a new task
-
-| HTTP Method | API URI | Body ID |
-| ----------- | ----------- | ----------- |
-| POST | /tasks | True |
-
-body
-
-```json
-{
-    "status": [
-        "pending"
-    ],
-    "name": "test out api methods"
-}
+```bash
+$ openssl genrsa -out ./client.key 2048 
+$ openssl req -new -key ./client.key -out ./client.csr
+$ openssl x509 -req -in ./client.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./client.crt -days 365
 ```
 
-![create](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/images/create.png?raw=true)
+Finally, we will use the rootCA to create a certificate for the jtimon container client
 
-### Get list of tasks
+> pay close attention to the fqdn for this section, it needs to match your router's hostname
 
-| HTTP Method | API URI | Body ID |
-| ----------- | ----------- | ----------- |
-| GET | /tasks | False |
+```bash
+$ openssl genrsa -out ./router.key 2048 
+$ openssl req -new -key ./router.key -out ./router.csr
+$ openssl x509 -req -in ./router.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./router.crt -days 365
+$ cat ./router.crt ./router.key > ./router.pem
+```
 
-![list](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/images/list.png?raw=true)
+## Copy relevant certs to router
 
-### Delete task
+Let's use SCP to copy the certs to our router; only relevant files are transferred and stored in the router's `/var/tmp/` directory.
 
-| HTTP Method | API URI | Body ID |
-| ----------- | ----------- | ----------- |
-| DELETE | /tasks/:taskId | False |
+```bash
+$ scp rootCA.crt client.crt router.pem root@192.168.110.11:/var/tmp/
+```
 
-![delete](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/images/delete.png?raw=true)
+## Configure JunOS
 
-*This page is automatically generated using a Python script within the .github directory*
+Three steps here, each with their own commit operation.
+
+1. create CA profile and new local certificate
+2. load CA profile and configure streaming attributes
+3. enable the streaming of telemetry to our jtimon container
+
+### create CA profile and new local certificate
+
+### load CA profile and configure streaming attributes
+
+### enable the streaming of telemetry to our jtimon container
+
+*This page is automatically generated*
