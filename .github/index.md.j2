@@ -200,7 +200,7 @@ Final thing to setup before we execute is our client's configuration file. This 
 Let's fire this collector up.
 
 ```bash
-docker run -it --rm -v ${PWD}:/var/tmp/:ro jtimon --config /var/tmp/config.json --print
+docker run -it --rm -v ${PWD}:/var/tmp/:ro ghcr.io/cdot65/jtimon --config /var/tmp/config.json --print
 ```
 
 Breaking down the flags used:
