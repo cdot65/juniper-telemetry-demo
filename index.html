@@ -309,6 +309,40 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#setting-up-jtimon-container" class="md-nav__link">
+    Setting up jtimon container
+  </a>
+  
+    <nav class="md-nav" aria-label="Setting up jtimon container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-the-container-image" class="md-nav__link">
+    Building the container image
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-up-our-configuration-file" class="md-nav__link">
+    Setting up our configuration file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execute" class="md-nav__link">
+    Execute!
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -412,6 +446,40 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#setting-up-jtimon-container" class="md-nav__link">
+    Setting up jtimon container
+  </a>
+  
+    <nav class="md-nav" aria-label="Setting up jtimon container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-the-container-image" class="md-nav__link">
+    Building the container image
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-up-our-configuration-file" class="md-nav__link">
+    Setting up our configuration file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execute" class="md-nav__link">
+    Execute!
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -505,6 +573,78 @@
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>set system services extension-service request-response grpc ssl local-certificate router-cert
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>commit
 </code></pre></div>
+<h2 id="setting-up-jtimon-container">Setting up jtimon container<a class="headerlink" href="#setting-up-jtimon-container" title="Permanent link">#</a></h2>
+<p>Nice job getting the telemetry and certs working, now we need to focus on the client side of things.</p>
+<ol>
+<li>Building the client container image</li>
+<li>Setting up our configuration file</li>
+<li>Execute!</li>
+</ol>
+<h3 id="building-the-container-image">Building the container image<a class="headerlink" href="#building-the-container-image" title="Permanent link">#</a></h3>
+<blockquote>
+<p>you <em>could</em> bypass this step if you trust that my <code>ghcr.io/cdot65/jtimon:latest</code> container image is sufficient</p>
+</blockquote>
+<p>We will need to build the container image before we can create a container based upon it, so let&rsquo;s start there first.</p>
+<p>Change into a temporary directory, we will use this place to clone the repository and build our image from.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span> /var/tmp/
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>git clone https://github.com/nileshsimaria/jtimon.git
+</code></pre></div>
+<p>Execute the Makefile script to build the container image.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>make docker
+</code></pre></div>
+<blockquote>
+<p>If you find that you do not have Make installed on your computer, reconsider downloading my image with <code>docker pull ghcr.io/cdot65/jtimon:latest</code></p>
+</blockquote>
+<p>You can test the container by running the <code>--help</code> flag within the container. Don&rsquo;t worry, the container will be destroyed as soon as it runs so you won&rsquo;t have to worry about cleanup.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker run -ti --rm -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/u:ro jtimon --help
+</code></pre></div>
+<p>We will talk about these flags used when we get to the Execute! section below.</p>
+<h3 id="setting-up-our-configuration-file">Setting up our configuration file<a class="headerlink" href="#setting-up-our-configuration-file" title="Permanent link">#</a></h3>
+<p>Final thing to setup before we execute is our client&rsquo;s configuration file. This tells the <code>jtimon</code> process quite a bit of valuable information:</p>
+<ul>
+<li>which IP and port combination to use for communication with the router</li>
+<li>how to authenticate with the router</li>
+<li>which certs to use, and where they are located within the container</li>
+<li>what hostname the container should expect to hear from the router</li>
+<li>which OpenConfig model(s) the client would like to setup a subscription for</li>
+<li>how fast the client would like to receive these streamed messages</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.110.11&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32767</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;root&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;juniper123&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="nt">&quot;cid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cid&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="nt">&quot;tls&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="nt">&quot;clientcrt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/tmp/client.crt&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">        </span><span class="nt">&quot;clientkey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/tmp/client.key&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">        </span><span class="nt">&quot;ca&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/tmp/rootCA.crt&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">        </span><span class="nt">&quot;servername&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;houston.dmz.home&quot;</span><span class="w"></span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="p">},</span><span class="w"></span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="nt">&quot;grpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">        </span><span class="nt">&quot;ws&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1048576</span><span class="w"></span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="w">    </span><span class="p">},</span><span class="w"></span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="w">    </span><span class="nt">&quot;paths&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="w">        </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="w">            </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/network-instances/network-instance/protocols/protocol/bgp/&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="w">            </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30000</span><span class="w"></span>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a><span class="w">    </span><span class="p">]</span><span class="w"></span>
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="execute">Execute!<a class="headerlink" href="#execute" title="Permanent link">#</a></h3>
+<p>Let&rsquo;s fire this collector up.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>docker run -it --rm -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/var/tmp/:ro jtimon --config /var/tmp/config.json --print
+</code></pre></div>
+<p>Breaking down the flags used:</p>
+<ul>
+<li><code>-it</code> is the way we tell Docker that we&rsquo;d like an interactive session with the container</li>
+<li><code>--rm</code> tells Docker to destroy the container after it completes its task</li>
+<li><code>-v ${PWD}:/var/tmp/:ro</code> says &ldquo;mount this local directory to the container&rsquo;s <code>/var/tmp/</code> with read-only permissions&rdquo;</li>
+<li><code>jtimon</code> is the actual executable</li>
+<li><code>--config</code> tells jtimon where to find its config file, in our case <code>/var/tmp/config.json</code></li>
+<li><code>--print</code> will print the output to our terminal</li>
+</ul>
 <p><em>This page is automatically generated</em></p>
 
               
