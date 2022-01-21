@@ -18,9 +18,9 @@ At the end of this page we will have deployed a Docker container running [jtimon
 
 I make a lot of assumptions in this documentation, here's a short list:
 
-  - you have [Docker installed]() somewhere that can reach the internet
+  - you have [Docker installed](https://docs.docker.com/get-docker/) somewhere that can reach the internet
   - you understand the [value proposition and technology that powers](https://www.juniper.net/documentation/us/en/software/junos/interfaces-telemetry/topics/concept/junos-telemetry-interface-oveview.html) streaming telemetry
-  - you have access to a Juniper device with JTI installed
+  - you have access to a [Juniper device with JTI installed](https://www.juniper.net/us/en/dm/vmx-trial-download.html)
 
 ## Creating our certs
 
@@ -29,16 +29,16 @@ We will be using SSL certificates for this demo, and if you've ever played with 
 Let's start off by generating a self-signed root CA:
 
 ```bash
-$ openssl genrsa -out rootCA.key 2048
-$ openssl req -x509 -new -key ./rootCA.key -days 365 -out ./rootCA.crt
+openssl genrsa -out rootCA.key 2048
+openssl req -x509 -new -key ./rootCA.key -days 365 -out ./rootCA.crt
 ```
 
 Our next step is to use the rootCA to create a certificate for the jtimon container client
 
 ```bash
-$ openssl genrsa -out ./client.key 2048 
-$ openssl req -new -key ./client.key -out ./client.csr
-$ openssl x509 -req -in ./client.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./client.crt -days 365
+openssl genrsa -out ./client.key 2048 
+openssl req -new -key ./client.key -out ./client.csr
+openssl x509 -req -in ./client.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./client.crt -days 365
 ```
 
 Finally, we will use the rootCA to create a certificate for the jtimon container client
@@ -46,10 +46,10 @@ Finally, we will use the rootCA to create a certificate for the jtimon container
 > pay close attention to the fqdn for this section, it needs to match your router's hostname
 
 ```bash
-$ openssl genrsa -out ./router.key 2048 
-$ openssl req -new -key ./router.key -out ./router.csr
-$ openssl x509 -req -in ./router.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./router.crt -days 365
-$ cat ./router.crt ./router.key > ./router.pem
+openssl genrsa -out ./router.key 2048 
+openssl req -new -key ./router.key -out ./router.csr
+openssl x509 -req -in ./router.csr -CA ./rootCA.crt -CAkey ./rootCA.key -CAcreateserial -out ./router.crt -days 365
+cat ./router.crt ./router.key > ./router.pem
 ```
 
 ## Copy relevant certs to router
@@ -57,7 +57,7 @@ $ cat ./router.crt ./router.key > ./router.pem
 Let's use SCP to copy the certs to our router; only relevant files are transferred and stored in the router's `/var/tmp/` directory.
 
 ```bash
-$ scp rootCA.crt client.crt router.pem root@192.168.110.11:/var/tmp/
+scp rootCA.crt client.crt router.pem root@192.168.110.11:/var/tmp/
 ```
 
 ## Configure JunOS
