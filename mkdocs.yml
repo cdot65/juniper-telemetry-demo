@@ -1,0 +1,51 @@
+site_name: juniper-telemetry-demo
+site_author: cdot65
+site_description: Leverage the jtimon project to ingest JTI telemetry over gRPC with SSL
+docs_dir: files/docs/
+theme:
+  name: material
+  features:
+    - instant
+  highlightjs: true
+  hljs_style: obsidian
+  hljs_languages:
+    - yaml
+    - javascript
+    - python
+    - shell
+extra_css:
+  - stylesheets/cdot65.css
+copyright: Copyright &copy; 2022 cdot65
+repo_name: "juniper-telemetry-demo"
+repo_url: https://github.com/cdot65/juniper-telemetry-demo
+use_directory_urls: true
+nav:
+  - Homepage: index.md
+
+markdown_extensions:
+  - smarty
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - fontawesome_markdown
+  - admonition
+  - codehilite:
+      guess_lang: true
+  - toc:
+      separator: "-"
+      permalink: "#"
+      baselevel: 1
