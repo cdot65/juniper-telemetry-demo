@@ -1,4 +1,4 @@
-# juniper-telemetry-demo
+# Juniper Telemetry Demo
 
 Welcome to the repository that manages the [documentation](https://cdot65.github.io/juniper-telemetry-demo/) for my Juniper Telemetry demo. In this demonstration, we will deploy [jtimon](https://github.com/nileshsimaria/jtimon) as a container to ingest JTI telemetry from Juniper vMX routers
 
