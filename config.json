@@ -1,0 +1,22 @@
+{
+    "host": "192.168.110.11",
+    "port": 32767,
+    "user": "root",
+    "password": "juniper123",
+    "cid": "cid",
+    "tls": {
+        "clientcrt": "/var/tmp/client.crt",
+        "clientkey": "/var/tmp/client.key",
+        "ca": "/var/tmp/rootCA.crt",
+        "servername": "houston.dmz.home"
+    },
+    "grpc": {
+        "ws": 1048576
+    },
+    "paths": [
+        {
+            "path": "/network-instances/network-instance/protocols/protocol/bgp/",
+            "freq": 30000
+        }
+    ]
+}
