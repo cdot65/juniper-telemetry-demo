@@ -596,7 +596,7 @@
 <p>If you find that you do not have Make installed on your computer, reconsider downloading my image with <code>docker pull ghcr.io/cdot65/jtimon:latest</code></p>
 </blockquote>
 <p>You can test the container by running the <code>--help</code> flag within the container. Don&rsquo;t worry, the container will be destroyed as soon as it runs so you won&rsquo;t have to worry about cleanup.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker run -ti --rm -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/u:ro jtimon --help
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker run -it --rm -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/var/tmp/:ro ghcr.io/cdot65/jtimon --help
 </code></pre></div>
 <p>We will talk about these flags used when we get to the Execute! section below.</p>
 <h3 id="setting-up-our-configuration-file">Setting up our configuration file<a class="headerlink" href="#setting-up-our-configuration-file" title="Permanent link">#</a></h3>
