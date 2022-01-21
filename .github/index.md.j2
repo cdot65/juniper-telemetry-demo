@@ -70,8 +70,56 @@ Three steps here, each with their own commit operation.
 
 ### create CA profile and new local certificate
 
+We will create a new CA profile with the name of `ca-profile-1` and give it an identify of `ca-id-1`.
+
+```junos
+set security pki ca-profile ca-profile-1 ca-identity ca-id-1
+```
+
+Now we will create a new certificate profile for the router and tell it where it can find the file we transferred.
+
+```junos
+set security certificates local router-cert load-key-file /var/tmp/router.pem
+```
+
+Give the box your first commit
+
+```junos
+commit
+```
+
 ### load CA profile and configure streaming attributes
 
+Now that the CA profile has been created, we can associate the root CA certificate to it.
+
+```junos
+run request security pki ca-certificate load ca-profile ca-profile-1 filename /var/tmp/rootCA.crt
+```
+
+Let's set up some basic streaming parameters that will tie together our local router cert and the root CA.
+
+```junos
+set system services extension-service request-response grpc ssl port 50051
+set system services extension-service request-response grpc ssl local-certificate router-cert
+set system services extension-service request-response grpc ssl mutual-authentication certificate-authority ca-id-1
+set system services extension-service request-response grpc ssl mutual-authentication client-certificate-request require-certificate-and-verify
+```
+
+Give the box your second commit
+
+```junos
+commit
+```
+
 ### enable the streaming of telemetry to our jtimon container
+
+Final step is to configure our source endpoint parameters, in our case this will be the local router's management IP and port to listen for connections on.
+
+```junos
+set system services extension-service request-response grpc ssl address 192.168.110.11
+set system services extension-service request-response grpc ssl port 32767
+set system services extension-service request-response grpc ssl local-certificate router-cert
+commit
+```
 
 *This page is automatically generated*
