@@ -4,7 +4,7 @@
 #
 # GNU General Public License v3.0+
 #
-# Copyright 2020 cdot65
+# Copyright 2022 cdot65
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ from jinja2 import Environment, FileSystemLoader
 
 TEMPLATE_MARKDOWN = "index.md.j2"
 OUTPUT_FILE = "../files/docs/index.md"
-PAGE_TITLE = "Example Express app deployed on k8s"
+PAGE_TITLE = "Juniper Telemetry demo documentation"
 PROJECT_NAME = "juniper-telemetry-demo"
 ORGANISATION_NAME = "cdot65"
 ORGANISATION_URL = "https://github.com/" + ORGANISATION_NAME
