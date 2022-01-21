@@ -476,8 +476,35 @@
 <li>enable the streaming of telemetry to our jtimon container</li>
 </ol>
 <h3 id="create-ca-profile-and-new-local-certificate">create CA profile and new local certificate<a class="headerlink" href="#create-ca-profile-and-new-local-certificate" title="Permanent link">#</a></h3>
+<p>We will create a new CA profile with the name of <code>ca-profile-1</code> and give it an identify of <code>ca-id-1</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>set security pki ca-profile ca-profile-1 ca-identity ca-id-1
+</code></pre></div>
+<p>Now we will create a new certificate profile for the router and tell it where it can find the file we transferred.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>set security certificates local router-cert load-key-file /var/tmp/router.pem
+</code></pre></div>
+<p>Give the box your first commit</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>commit
+</code></pre></div>
 <h3 id="load-ca-profile-and-configure-streaming-attributes">load CA profile and configure streaming attributes<a class="headerlink" href="#load-ca-profile-and-configure-streaming-attributes" title="Permanent link">#</a></h3>
+<p>Now that the CA profile has been created, we can associate the root CA certificate to it.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>run request security pki ca-certificate load ca-profile ca-profile-1 filename /var/tmp/rootCA.crt
+</code></pre></div>
+<p>Let&rsquo;s set up some basic streaming parameters that will tie together our local router cert and the root CA.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>set system services extension-service request-response grpc ssl port 50051
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>set system services extension-service request-response grpc ssl local-certificate router-cert
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>set system services extension-service request-response grpc ssl mutual-authentication certificate-authority ca-id-1
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>set system services extension-service request-response grpc ssl mutual-authentication client-certificate-request require-certificate-and-verify
+</code></pre></div>
+<p>Give the box your second commit</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>commit
+</code></pre></div>
 <h3 id="enable-the-streaming-of-telemetry-to-our-jtimon-container">enable the streaming of telemetry to our jtimon container<a class="headerlink" href="#enable-the-streaming-of-telemetry-to-our-jtimon-container" title="Permanent link">#</a></h3>
+<p>Final step is to configure our source endpoint parameters, in our case this will be the local router&rsquo;s management IP and port to listen for connections on.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>set system services extension-service request-response grpc ssl address 192.168.110.11
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>set system services extension-service request-response grpc ssl port 32767
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>set system services extension-service request-response grpc ssl local-certificate router-cert
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>commit
+</code></pre></div>
 <p><em>This page is automatically generated</em></p>
 
               
