@@ -101,7 +101,7 @@ Let's set up some basic streaming parameters that will tie together our local ro
 ```junos
 set system services extension-service request-response grpc ssl port 50051
 set system services extension-service request-response grpc ssl local-certificate router-cert
-set system services extension-service request-response grpc ssl mutual-authentication certificate-authority ca-id-1
+set system services extension-service request-response grpc ssl mutual-authentication certificate-authority ca-profile-1
 set system services extension-service request-response grpc ssl mutual-authentication client-certificate-request require-certificate-and-verify
 ```
 
