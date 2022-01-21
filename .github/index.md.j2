@@ -122,4 +122,94 @@ set system services extension-service request-response grpc ssl local-certificat
 commit
 ```
 
+## Setting up jtimon container
+
+Nice job getting the telemetry and certs working, now we need to focus on the client side of things.
+
+1. Building the client container image
+2. Setting up our configuration file
+3. Execute!
+
+### Building the container image
+
+> you *could* bypass this step if you trust that my `ghcr.io/cdot65/jtimon:latest` container image is sufficient
+
+We will need to build the container image before we can create a container based upon it, so let's start there first.
+
+Change into a temporary directory, we will use this place to clone the repository and build our image from.
+
+```bash
+cd /var/tmp/
+git clone https://github.com/nileshsimaria/jtimon.git
+```
+
+Execute the Makefile script to build the container image.
+
+```bash
+make docker
+```
+
+> If you find that you do not have Make installed on your computer, reconsider downloading my image with `docker pull ghcr.io/cdot65/jtimon:latest`
+
+You can test the container by running the `--help` flag within the container. Don't worry, the container will be destroyed as soon as it runs so you won't have to worry about cleanup.
+
+```bash
+docker run -ti --rm -v ${PWD}:/u:ro jtimon --help
+```
+
+We will talk about these flags used when we get to the Execute! section below.
+
+### Setting up our configuration file
+
+Final thing to setup before we execute is our client's configuration file. This tells the `jtimon` process quite a bit of valuable information:
+
+- which IP and port combination to use for communication with the router
+- how to authenticate with the router
+- which certs to use, and where they are located within the container
+- what hostname the container should expect to hear from the router
+- which OpenConfig model(s) the client would like to setup a subscription for
+- how fast the client would like to receive these streamed messages
+
+```json
+{
+    "host": "192.168.110.11",
+    "port": 32767,
+    "user": "root",
+    "password": "juniper123",
+    "cid": "cid",
+    "tls": {
+        "clientcrt": "/var/tmp/client.crt",
+        "clientkey": "/var/tmp/client.key",
+        "ca": "/var/tmp/rootCA.crt",
+        "servername": "houston.dmz.home"
+    },
+    "grpc": {
+        "ws": 1048576
+    },
+    "paths": [
+        {
+            "path": "/network-instances/network-instance/protocols/protocol/bgp/",
+            "freq": 30000
+        }
+    ]
+}
+```
+
+### Execute!
+
+Let's fire this collector up.
+
+```bash
+docker run -it --rm -v ${PWD}:/var/tmp/:ro jtimon --config /var/tmp/config.json --print
+```
+
+Breaking down the flags used:
+
+- `-it` is the way we tell Docker that we'd like an interactive session with the container
+- `--rm` tells Docker to destroy the container after it completes its task
+- `-v ${PWD}:/var/tmp/:ro` says "mount this local directory to the container's `/var/tmp/` with read-only permissions"
+- `jtimon` is the actual executable
+- `--config` tells jtimon where to find its config file, in our case `/var/tmp/config.json`
+- `--print` will print the output to our terminal
+
 *This page is automatically generated*
