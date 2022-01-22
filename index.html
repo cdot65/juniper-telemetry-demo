@@ -501,6 +501,7 @@
 <h2 id="welcome">Welcome<a class="headerlink" href="#welcome" title="Permanent link">#</a></h2>
 <p>First off, hello and welcome to the landing page of my demo&rsquo;s documentation. My name is Calvin and I work in the sales organization at Juniper Networks; I hope that you will find this project helpful.</p>
 <p>In this demonstration, we will deploy jtimon as a container to ingest JTI telemetry from Juniper vMX routers.</p>
+<p>This demonstration is based upon <a href="https://iosonounrouter.wordpress.com/2021/12/20/test-juniper-telemetry-in-two-seconds/">this great blog</a>.</p>
 <p><img alt="topology" src="https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/images/topology.png?raw=true" /></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>Let&rsquo;s talk about the workflow before we get into the requirements. </p>
@@ -596,7 +597,7 @@
 <p>If you find that you do not have Make installed on your computer, reconsider downloading my image with <code>docker pull ghcr.io/cdot65/jtimon:latest</code></p>
 </blockquote>
 <p>You can test the container by running the <code>--help</code> flag within the container. Don&rsquo;t worry, the container will be destroyed as soon as it runs so you won&rsquo;t have to worry about cleanup.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker run -ti --rm -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/u:ro jtimon --help
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker run -it --rm -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/var/tmp/:ro ghcr.io/cdot65/jtimon --help
 </code></pre></div>
 <p>We will talk about these flags used when we get to the Execute! section below.</p>
 <h3 id="setting-up-our-configuration-file">Setting up our configuration file<a class="headerlink" href="#setting-up-our-configuration-file" title="Permanent link">#</a></h3>
