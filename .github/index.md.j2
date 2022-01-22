@@ -6,6 +6,8 @@ First off, hello and welcome to the landing page of my demo's documentation. My 
 
 In this demonstration, we will deploy jtimon as a container to ingest JTI telemetry from Juniper vMX routers.
 
+This demonstration is based upon [this great blog](https://iosonounrouter.wordpress.com/2021/12/20/test-juniper-telemetry-in-two-seconds/).
+
 ![topology](https://github.com/cdot65/juniper-telemetry-demo/blob/main/files/images/topology.png?raw=true)
 
 ## Overview
@@ -154,7 +156,7 @@ make docker
 You can test the container by running the `--help` flag within the container. Don't worry, the container will be destroyed as soon as it runs so you won't have to worry about cleanup.
 
 ```bash
-docker run -ti --rm -v ${PWD}:/u:ro jtimon --help
+docker run -it --rm -v ${PWD}:/var/tmp/:ro ghcr.io/cdot65/jtimon --help
 ```
 
 We will talk about these flags used when we get to the Execute! section below.
